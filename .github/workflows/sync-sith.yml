@@ -3,7 +3,7 @@ name: sync-sith
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "17 9 * * *"
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   sync:
     name: verify and import latest Sith formula
-    runs-on: ubuntu-24.04
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
@@ -120,6 +120,24 @@ jobs:
           PY
           ruby -c "$RUNNER_TEMP/sith-release/sith.rb"
 
+      - name: Audit, install, and test candidate formula
+        if: env.HAS_RELEASE == 'true'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: |
+          set -euo pipefail
+          candidate_tap=ArdurAI/sith-candidate
+          brew tap-new --no-git "$candidate_tap"
+          candidate_dir=$(brew --repository "$candidate_tap")
+          trap 'brew uninstall --force sith >/dev/null 2>&1 || true; brew untap "$candidate_tap" >/dev/null 2>&1 || true' EXIT
+          install -m 0644 "$RUNNER_TEMP/sith-release/sith.rb" "$candidate_dir/Formula/sith.rb"
+          brew audit --strict --formula "$candidate_tap/sith"
+          brew style "$candidate_dir/Formula/sith.rb"
+          brew install --formula "$candidate_tap/sith"
+          brew test "$candidate_tap/sith"
+          sith version --output json
+
       - name: Update formula through the scoped repository API
         if: env.HAS_RELEASE == 'true'
         env:
@@ -132,7 +150,7 @@ jobs:
             exit 0
           fi
 
-          content=$(base64 -w 0 < "$source_formula")
+          content=$(base64 < "$source_formula" | tr -d '\n')
           message=$(printf 'chore: update Sith formula to %s\n\nSigned-off-by: Gnani Rahul <gnani.nutakki@gmail.com>\n' "$SITH_TAG")
           api_args=(
             --method PUT
