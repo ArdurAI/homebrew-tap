@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Formula/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "Formula/**"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formula:
+    name: audit · install · test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Validate Sith formula
+        run: |
+          set -euo pipefail
+          if [ ! -f Formula/sith.rb ]; then
+            echo "No formula has been published yet."
+            exit 0
+          fi
+          ruby -c Formula/sith.rb
+          brew tap ArdurAI/tap "file://${GITHUB_WORKSPACE}"
+          brew audit --strict --formula ArdurAI/tap/sith
+          brew style "$(brew --repository ArdurAI/tap)/Formula/sith.rb"
+          brew install --formula ArdurAI/tap/sith
+          brew test ArdurAI/tap/sith
+          sith version --output json
