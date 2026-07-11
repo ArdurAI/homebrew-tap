@@ -132,6 +132,7 @@ jobs:
           candidate_dir=$(brew --repository "$candidate_tap")
           trap 'brew uninstall --force sith >/dev/null 2>&1 || true; brew untap "$candidate_tap" >/dev/null 2>&1 || true' EXIT
           install -m 0644 "$RUNNER_TEMP/sith-release/sith.rb" "$candidate_dir/Formula/sith.rb"
+          brew trust --formula "$candidate_tap/sith"
           brew audit --strict --formula "$candidate_tap/sith"
           brew style "$candidate_dir/Formula/sith.rb"
           brew install --formula "$candidate_tap/sith"

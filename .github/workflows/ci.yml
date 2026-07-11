@@ -36,6 +36,7 @@ jobs:
           fi
           ruby -c Formula/sith.rb
           brew tap ArdurAI/tap "file://${GITHUB_WORKSPACE}"
+          brew trust --formula ArdurAI/tap/sith
           brew audit --strict --formula ArdurAI/tap/sith
           brew style "$(brew --repository ArdurAI/tap)/Formula/sith.rb"
           brew install --formula ArdurAI/tap/sith
