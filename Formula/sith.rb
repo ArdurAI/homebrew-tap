@@ -1,28 +1,28 @@
 class Sith < Formula
   desc "Local-first, account-free Kubernetes fleet tool"
   homepage "https://github.com/ArdurAI/sith"
-  version "0.1.0"
+  version "0.2.1"
   license "Apache-2.0"
 
   on_macos do
     on_intel do
-      url "https://github.com/ArdurAI/sith/releases/download/v0.1.0/sith_0.1.0_darwin_amd64.tar.gz"
-      sha256 "34add695278b37d19dc3106bf44339b3afeaef7d7ee23791e4728ebd00278a1d"
+      url "https://github.com/ArdurAI/sith/releases/download/v0.2.1/sith_0.2.1_darwin_amd64.tar.gz"
+      sha256 "438f14b5c025a33af48edc308aa5586ee9872d91d7ec7012df1b4e6f1a664219"
     end
     on_arm do
-      url "https://github.com/ArdurAI/sith/releases/download/v0.1.0/sith_0.1.0_darwin_arm64.tar.gz"
-      sha256 "52aa730a412d4d5be93eff4cefc4807fc90d07249a17e95be1169236624cc6b4"
+      url "https://github.com/ArdurAI/sith/releases/download/v0.2.1/sith_0.2.1_darwin_arm64.tar.gz"
+      sha256 "77c86e59fb28a7e04e591897b30b56164f365999479c2adace17108a2c6a75d4"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/ArdurAI/sith/releases/download/v0.1.0/sith_0.1.0_linux_amd64.tar.gz"
-      sha256 "c8cf2eaa2c73f08f945354849dfa3523f66defeb784e931c6cabd768b9648985"
+      url "https://github.com/ArdurAI/sith/releases/download/v0.2.1/sith_0.2.1_linux_amd64.tar.gz"
+      sha256 "ea9515ad1445935f7a6352a0a0d30a7df900c8179b759d576481613171323741"
     end
     on_arm do
-      url "https://github.com/ArdurAI/sith/releases/download/v0.1.0/sith_0.1.0_linux_arm64.tar.gz"
-      sha256 "9814f0ab243714815a7fcdb5847aed69f343ebb128ab697bb594c2fe9e7ecc60"
+      url "https://github.com/ArdurAI/sith/releases/download/v0.2.1/sith_0.2.1_linux_arm64.tar.gz"
+      sha256 "ab78392c7a5e351e18c94c1aa9cececd85c1371670baae63ed235d72f88ffdce"
     end
   end
 
@@ -32,6 +32,6 @@ class Sith < Formula
 
   test do
     output = shell_output("#{bin}/sith version --output json")
-    assert_match "\"version\":\"0.1.0\"", output
+    assert_match "\"version\":\"0.2.1\"", output
   end
 end
