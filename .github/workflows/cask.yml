@@ -1,0 +1,51 @@
+name: cask
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Casks/**"
+      - ".github/workflows/cask.yml"
+  pull_request:
+    paths:
+      - "Casks/**"
+      - ".github/workflows/cask.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cask-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ardur:
+    name: ardur cask · audit · fetch
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Validate Ardur cask
+        run: |
+          set -euo pipefail
+          if [ ! -f Casks/ardur.rb ]; then
+            echo "No cask has been published yet."
+            exit 0
+          fi
+          ruby -c Casks/ardur.rb
+          version="$(ruby -e 'print File.read("Casks/ardur.rb")[/^  version "([^"]+)"/, 1]')"
+          curl -fsSL "https://github.com/ArdurAI/ardur-bot/releases/download/v${version}/checksums.txt" -o "${RUNNER_TEMP}/checksums.txt"
+          for arch in arm64 x64; do
+            want="$(awk -v f="ardur-${version}-mac-${arch}.dmg" '$2 == f { print $1 }' "${RUNNER_TEMP}/checksums.txt")"
+            if [ -z "${want}" ] || ! grep -q "sha256 \"${want}\"" Casks/ardur.rb; then
+              echo "Casks/ardur.rb does not match the ${arch} checksum in the v${version} release."
+              exit 1
+            fi
+          done
+          brew tap ArdurAI/tap "file://${GITHUB_WORKSPACE}"
+          brew trust --cask ArdurAI/tap/ardur
+          brew style "$(brew --repository ArdurAI/tap)/Casks/ardur.rb"
+          brew audit --strict --cask ArdurAI/tap/ardur
+          brew fetch --cask ArdurAI/tap/ardur
