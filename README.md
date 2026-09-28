@@ -1,6 +1,7 @@
 # ArdurAI Homebrew tap
 
-This tap distributes signed release formulae for ArdurAI tools.
+This tap distributes release formulae and casks for ArdurAI tools. Each section below says how its
+package is built and verified.
 
 ## Sith
 
@@ -25,3 +26,21 @@ tap.
 Ordinary human-authored formula changes also run the separate tap CI. Release verification commands
 and the trust model live in the
 [Sith release guide](https://github.com/ArdurAI/sith/blob/main/docs/RELEASE.md).
+
+## Ardur desktop preview
+
+```bash
+brew tap ArdurAI/tap
+brew trust --cask ArdurAI/tap/ardur
+brew install --cask ArdurAI/tap/ardur
+```
+
+Ardur previews are not signed or notarized yet. After installing, approve the app once in
+Privacy & Security. Homebrew still checks each download against the SHA-256 in the cask.
+
+`Casks/ardur.rb` is the `ardur.rb` file attached to each
+[`ArdurAI/ardur-bot`](https://github.com/ArdurAI/ardur-bot/releases) pre-release. The release
+workflow fills its version, DMG URLs and SHA-256 values from the built files; the same release's
+`checksums.txt` lists those values. Cask updates are reviewed pull requests. The tap CI checks the
+cask against that `checksums.txt`, audits it, and fetches the Apple silicon DMG to verify its
+checksum.
