@@ -49,3 +49,16 @@ jobs:
           brew style "$(brew --repository ArdurAI/tap)/Casks/ardur.rb"
           brew audit --strict --cask ArdurAI/tap/ardur
           brew fetch --cask ArdurAI/tap/ardur
+
+      - name: Install and remove Ardur
+        run: |
+          set -euo pipefail
+          if [ ! -f Casks/ardur.rb ]; then
+            exit 0
+          fi
+          # The website shows the install command only after this passes end to end.
+          brew install --cask ArdurAI/tap/ardur
+          test -d /Applications/Ardur.app
+          test -x "$(brew --prefix)/bin/ardur"
+          brew uninstall --cask ArdurAI/tap/ardur
+          test ! -e /Applications/Ardur.app
